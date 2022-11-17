@@ -29,14 +29,26 @@ post "/callback" do
         file.write(response.body)
       end
 
-      texts = image_to_texts(tempfile.path)
-      client.reply_message(e['replyToken'], {
-        type: 'text',
-        text: texts.join
-      })
+      begin
+        texts = image_to_texts(tempfile.path)
+        client.reply_message(e['replyToken'], {
+          type: 'text',
+          text: texts.join
+        })
+      rescue => e
+        puts e.message
+        client.reply_message(e['replyToken'], {
+          type: 'text',
+          text: "解析に失敗しました"
+        })
+      end
     else
       puts response.code
       puts response.body
+      client.reply_message(e['replyToken'], {
+        type: 'text',
+        text: 'ネットワークエラー'
+      })
     end
   end
 
